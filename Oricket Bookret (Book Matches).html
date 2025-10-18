@@ -1,0 +1,178 @@
+<!doctype html>  
+<html lang="en">  
+<head>  
+<meta charset="utf-8">  
+<meta name="viewport" content="width=device-width,initial-scale=1">  
+<title>Oricket Bookret — Multi-Player Cricket Booking</title>  
+<style>  
+:root{  
+  --bg:#0b1220; --card:#0f1724; --accent:#ffcc00; --muted:#9aa7b2;  
+  --glass:rgba(255,255,255,0.03);  
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;  
+}  
+html,body{height:100%;margin:0;background:linear-gradient(180deg,#071026 0%,#0b1723 100%);color:#e6eef6;}  
+.wrap{max-width:900px;margin:36px auto;padding:24px;}  
+header{display:flex;align-items:center;gap:16px;margin-bottom:18px;}  
+.logo{width:68px;height:68px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#ff9f1c);color:#0b1220;font-weight:700;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.6);font-size:20px;}  
+h1{margin:0;font-size:20px;}  
+p.lead{margin:4px 0 0;color:var(--muted);font-size:13px;}  
+.card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}  
+form .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);}  
+@media (max-width:720px){form .grid{grid-template-columns:1fr}}  
+label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}  
+input,select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);background:var(--glass);color:inherit;outline:none;font-size:14px;}  
+textarea{min-height:86px;resize:vertical;}  
+.actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}  
+button{border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;}  
+.btn-primary{background:linear-gradient(90deg,var(--accent),#ff9f1c);color:#071026;}  
+.btn-ghost{background:rgba(255,255,255,0.03);color:var(--muted);}  
+.hidden{display:none;}  
+.result{margin-top:16px;background:linear-gradient(180deg,rgba(255,255,255,0.02),transparent);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);}  
+.code{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,"Roboto Mono",monospace;font-size:18px;padding:6px 10px;background:rgba(0,0,0,0.25);border-radius:8px;display:inline-block;}  
+.tiny{font-size:12px;color:var(--muted);}  
+footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center;}  
+.player-section{margin-top:10px;padding:10px;border:1px solid rgba(255,255,255,0.05);border-radius:10px;background:rgba(255,255,255,0.02);}  
+.player-section h3{margin-top:0;font-size:15px;color:var(--accent);}  
+</style>  
+</head>  
+<body>  
+<div class="wrap">  
+  <header>  
+    <div class="logo">OB</div>  
+    <div>  
+      <h1>Oricket Bookret</h1>  
+      <p class="lead">Secure multi-player cricket booking form</p>  
+    </div>  
+  </header>  
+  
+  <!-- Access Gate -->  
+  <main id="accessGate" class="card">  
+    <h2>Enter Access Code</h2>  
+    <p class="tiny">Authorized users only</p>  
+    <input id="accessInput" type="password" placeholder="Enter access code..." style="margin-top:10px;">  
+    <div class="actions">  
+      <button id="accessBtn" class="btn-primary">Unlock</button>  
+    </div>  
+    <p id="accessError" class="tiny" style="color:#ff5555;display:none;">❌ Invalid code. Try again.</p>  
+  </main>  
+  
+  <!-- Booking Form -->  
+  <main id="bookingArea" class="card hidden">  
+    <form id="bookingForm" novalidate>  
+      <div class="grid">  
+        <div>  
+          <label for="matchDate">Match / Session date *</label>  
+          <input id="matchDate" name="matchDate" type="date" required>  
+        </div>  
+        <div>  
+          <label for="tickets">Number of players</label>  
+          <input id="tickets" name="tickets" type="number" min="1" max="10" value="1">  
+        </div>  
+      </div>  
+  
+      <div id="playersContainer"></div>  
+  
+      <div style="margin-top:12px;">  
+        <label for="team">Team or Group name</label>  
+        <input id="team" name="team" type="text" placeholder="optional">  
+      </div>  
+  
+      <div style="margin-top:12px;">  
+        <label for="category">Booking category</label>  
+        <select id="category" name="category">  
+          <option value="special">Special Match</option>  
+          <option value="league">League Match</option>  
+          <option value="practice">Practice</option>  
+          <option value="tournament">Tournament/Test</option>  
+        </select>  
+      </div>  
+  
+      <div style="margin-top:12px;">  
+        <label for="notes">Additional notes</label>  
+        <textarea id="notes" name="notes" placeholder="E.g. preferred pitch, equipment..."></textarea>  
+      </div>  
+  
+      <div class="actions">  
+        <button type="submit" class="btn-primary">Confirm booking & Generate code</button>  
+        <button type="button" id="clearBtn" class="btn-ghost">Clear form</button>  
+      </div>  
+    </form>  
+  
+    <section id="result" class="result hidden">  
+      <div>  
+        <div class="tiny">Booking confirmed</div>  
+        <div style="margin-top:8px;">  
+          <span id="bookingCode" class="code">---</span>  
+          <button id="copyBtn" class="btn-ghost">Copy code</button>  
+        </div>  
+        <pre id="fullDetails" style="white-space:pre-wrap;margin-top:10px;font-size:13px;"></pre>  
+      </div>  
+    </section>  
+  </main>  
+  
+  <footer><small>Oricket Bookret — demo only, data not sent anywhere.</small></footer>  
+</div>  
+  
+<script>  
+// Access code gate  
+const accessGate=document.getElementById('accessGate');  
+const bookingArea=document.getElementById('bookingArea');  
+const accessBtn=document.getElementById('accessBtn');  
+const accessInput=document.getElementById('accessInput');  
+const accessError=document.getElementById('accessError');  
+const ACCESS_CODE="CODE91";  
+accessBtn.onclick=()=>{if(accessInput.value.trim().toUpperCase()===ACCESS_CODE){accessGate.classList.add('hidden');bookingArea.classList.remove('hidden');}else{accessError.style.display='block';}};  
+accessInput.addEventListener('keypress',e=>{if(e.key==='Enter')accessBtn.click();});  
+  
+// Dynamic players  
+const playersContainer=document.getElementById('playersContainer');  
+const ticketsInput=document.getElementById('tickets');  
+function renderPlayers(n){  
+  playersContainer.innerHTML='';  
+  for(let i=1;i<=n;i++){  
+    const sec=document.createElement('section');  
+    sec.className='player-section';  
+    sec.innerHTML=`  
+      <h3>Player ${i}</h3>  
+      <div class="grid">  
+        <div><label>Full name *</label><input name="player${i}_name" type="text" required placeholder="e.g. Player ${i} Name"></div>  
+        <div><label>Date of Birth *</label><input name="player${i}_dob" type="date" required></div>  
+        <div><label>Player ID</label><input name="player${i}_id" type="text" placeholder="optional"></div>  
+        <div><label>Email</label><input name="player${i}_email" type="email" placeholder="optional"></div>  
+      </div>`;  
+    playersContainer.appendChild(sec);  
+  }  
+}  
+renderPlayers(1);  
+ticketsInput.addEventListener('input',()=>{const n=Math.max(1,Math.min(10,parseInt(ticketsInput.value)||1));renderPlayers(n);});  
+  
+// Booking form  
+const bookingForm=document.getElementById('bookingForm');  
+const result=document.getElementById('result');  
+const bookingCodeEl=document.getElementById('bookingCode');  
+const fullDetails=document.getElementById('fullDetails');  
+function generateBookingCode(){  
+  const arr=new Uint8Array(6);crypto.getRandomValues(arr);  
+  const chunk=Array.from(arr).map(b=>(b%36).toString(36)).join('').toUpperCase();  
+  const digits=Math.floor(1000+Math.random()*9000);  
+  return 'ORB-'+chunk+'-'+digits;  
+}  
+bookingForm.addEventListener('submit',e=>{  
+  e.preventDefault();  
+  if(!bookingForm.checkValidity()){bookingForm.reportValidity();return;}  
+  const data=Object.fromEntries(new FormData(bookingForm).entries());  
+  const code=generateBookingCode();  
+  bookingCodeEl.textContent=code;  
+  let detail=`Booking Code: ${code}\nMatch Date: ${data.matchDate}\nPlayers: ${data.tickets}\nTeam: ${data.team||'-'}\nCategory: ${data.category}\n\nPlayers:\n`;  
+  for(let i=1;i<=data.tickets;i++){  
+    detail+=`  ${i}. ${data[`player${i}_name`]||'-'} | DOB: ${data[`player${i}_dob`]||'-'} | ID: ${data[`player${i}_id`]||'-'} | Email: ${data[`player${i}_email`]||'-'}\n`;  
+  }  
+  detail+=`\nNotes: ${data.notes||'-'}`;  
+  fullDetails.textContent=detail;  
+  result.classList.remove('hidden');  
+});  
+document.getElementById('copyBtn').onclick=()=>navigator.clipboard.writeText(bookingCodeEl.textContent);  
+document.getElementById('clearBtn').onclick=()=>bookingForm.reset();  
+</script>  
+</body>  
+</html>  
