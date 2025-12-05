@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Oricket Bookret — Cricket Booking</title>
+<style>
+  :root{--bg:#0b1220;--card:#0f1724;--accent:#ffcc00;--muted:#9aa7b2;--glass:rgba(255,255,255,0.03);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;}
+  html,body{height:100%;margin:0;background:linear-gradient(180deg,#071026 0%,#0b1723 100%);color:#e6eef6;}
+  .wrap{max-width:900px;margin:36px auto;padding:24px;}
+  header{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;}
+  .logo-area{display:flex;align-items:center;gap:16px;}
+  .logo{width:68px;height:68px;display:grid;place-items:center;background:linear-gradient(135deg,var(--accent),#ff9f1c);
+  color:#0b1220;font-weight:700;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.6);font-size:20px;}
+  h1{margin:0;font-size:20px;letter-spacing:0.4px;}
+  p.lead{margin:4px 0 0;color:var(--muted);font-size:13px;}
+  .btn-admin{background:rgba(255,255,255,0.08);color:var(--accent);border:1px solid rgba(255,255,255,0.1);
+  padding:8px 12px;border-radius:10px;font-weight:600;cursor:pointer;}
+  .card{background:var(--card);border-radius:12px;padding:18px;box-shadow:0 8px 30px rgba(2,6,23,0.6);}
+  form .grid{display:grid;gap:12px;grid-template-columns:repeat(2,1fr);}
+  @media(max-width:720px){form .grid{grid-template-columns:1fr}}
+  label{display:block;font-size:13px;color:var(--muted);margin-bottom:6px;}
+  input,select,textarea{width:100%;padding:10px 12px;border-radius:8px;border:1px solid rgba(255,255,255,0.06);
+  background:var(--glass);color:inherit;outline:none;font-size:14px;}
+  textarea{min-height:86px;resize:vertical;}
+  .muted{color:var(--muted);font-size:13px;margin-top:6px;}
+  .actions{display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;}
+  button{border:0;padding:10px 14px;border-radius:10px;cursor:pointer;font-weight:600;}
+  .btn-primary{background:linear-gradient(90deg,var(--accent),#ff9f1c);color:#071026;box-shadow:0 8px 20px rgba(255,180,50,0.12);}
+  .btn-ghost{background:rgba(255,255,255,0.03);color:var(--muted);}
+  .result{margin-top:16px;background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);padding:14px;border-radius:10px;border:1px solid rgba(255,255,255,0.03);}
+  .code{font-family:ui-monospace,Menlo,Monaco,"Roboto Mono";font-size:18px;padding:6px 10px;background:rgba(0,0,0,0.25);border-radius:8px;display:inline-block;}
+  .hidden{display:none;}
+  footer{margin-top:14px;color:var(--muted);font-size:12px;text-align:center;}
+  #adminPanel input{width:60%;max-width:300px;margin-right:8px;}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo-area">
+      <div class="logo" aria-hidden="true">OB</div>
+      <div>
+        <h1>Oricket Bookret</h1>
+        <p class="lead">Quick cricket booking form — fill in your info and get a booking code instantly.</p>
+      </div>
+    </div>
+    <button class="btn-admin" id="adminBtn">Admin</button>
+  </header>
+
+  <main class="card" id="mainContent">
+    <form id="bookingForm" novalidate>
+      <div class="grid">
+        <div>
+          <label for="fullname">Full name *</label>
+          <input id="fullname" name="fullname" required placeholder="e.g. Alex Morgan">
+        </div>
+        <div>
+          <label for="dob">Date of birth *</label>
+          <input id="dob" name="dob" type="date" required>
+        </div>
+        <div>
+          <label for="email">Email *</label>
+          <input id="email" name="email" type="email" required placeholder="you@example.com">
+        </div>
+        <div>
+          <label for="playerid">Player ID</label>
+          <input id="playerid" name="playerid" placeholder="e.g. 123456">
+        </div>
+        <div>
+          <label for="matchDate">Match / Session date *</label>
+          <input id="matchDate" name="matchDate" type="date" required>
+        </div>
+        <div>
+          <label for="tickets">Number of players/tickets</label>
+          <input id="tickets" name="tickets" type="number" min="1" max="50" value="1">
+        </div>
+        <div>
+          <label for="team">Team or Group name</label>
+          <input id="team" name="team" placeholder="optional">
+        </div>
+        <div>
+          <label for="category">Booking category</label>
+          <select id="category" name="category">
+            <option value="special">Special Match (e.g FINALS)</option>
+            <option value="league">League Match</option>
+            <option value="practice">Practice</option>
+            <option value="tournament">Tournament/Test</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-top:12px;">
+        <label for="notes">Additional notes</label>
+        <textarea id="notes" name="notes" placeholder="Preferred pitch, accessibility needs, etc."></textarea>
+        <p class="muted">By submitting you agree to our terms.</p>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn-primary">Confirm booking &amp; Generate code</button>
+        <button type="button" id="clearBtn" class="btn-ghost">Clear form</button>
+      </div>
+    </form>
+
+    <section id="result" class="result hidden">
+      <div>
+        <div class="tiny">Booking confirmed</div>
+        <span id="bookingCode" class="code">---</span>
+        <button id="copyBtn" class="btn-ghost">Copy code</button>
+        <p class="tiny" id="summary"></p>
+      </div>
+    </section>
+  </main>
+
+  <section id="adminPanel" class="card hidden">
+    <h3>Verify Booking Code</h3>
+    <input id="verifyCode" placeholder="Enter booking code">
+    <button id="verifyBtn" class="btn-primary">Check</button>
+    <pre id="verifyResult" class="hidden"></pre>
+    <button id="closeAdmin" class="btn-ghost">Close</button>
+  </section>
+
+  <footer>
+    <small>Oricket Bookret — local demo (no data sent anywhere).</small>
+  </footer>
+</div>
+
+<script>
+function generateBookingCode(){
+  const arr=new Uint8Array(6);crypto.getRandomValues(arr);
+  const chunk=Array.from(arr).map(b=>(b%36).toString(36)).join('').toUpperCase();
+  const digits=Math.floor(1000+Math.random()*9000);
+  return 'ORB-'+chunk+'-'+digits;
+}
+
+const bookingForm=document.getElementById('bookingForm');
+const result=document.getElementById('result');
+const bookingCodeEl=document.getElementById('bookingCode');
+const summaryEl=document.getElementById('summary');
+const adminBtn=document.getElementById('adminBtn');
+const adminPanel=document.getElementById('adminPanel');
+const verifyBtn=document.getElementById('verifyBtn');
+const verifyCodeInput=document.getElementById('verifyCode');
+const verifyResult=document.getElementById('verifyResult');
+const closeAdmin=document.getElementById('closeAdmin');
+const clearBtn=document.getElementById('clearBtn');
+
+bookingForm.addEventListener('submit', e=>{
+  e.preventDefault();
+  if(!bookingForm.checkValidity()){ bookingForm.reportValidity(); return; }
+  const data=Object.fromEntries(new FormData(bookingForm).entries());
+  const code=generateBookingCode();
+  const store=JSON.parse(localStorage.getItem('oricket_bookings')||'[]');
+  store.unshift({code,data,time:new Date().toISOString()});
+  localStorage.setItem('oricket_bookings',JSON.stringify(store.slice(0,50)));
+  bookingCodeEl.textContent=code;
+  summaryEl.textContent=`${data.fullname} — ${data.matchDate}`;
+  result.classList.remove('hidden');
+});
+
+document.getElementById('copyBtn').onclick=async()=>{await navigator.clipboard.writeText(bookingCodeEl.textContent);alert('Booking code copied!');};
+clearBtn.onclick=()=>bookingForm.reset();
+
+adminBtn.onclick=()=>{
+  const pass=prompt('Enter admin access code:');
+  if(pass==='ADMIN'){
+    adminPanel.classList.remove('hidden');
+    document.getElementById('mainContent').classList.add('hidden');
+  }else if(pass!==null){alert('Invalid admin code.');}
+};
+
+closeAdmin.onclick=()=>{
+  adminPanel.classList.add('hidden');
+  document.getElementById('mainContent').classList.remove('hidden');
+  verifyResult.classList.add('hidden');
+  verifyCodeInput.value='';
+};
+
+verifyBtn.onclick=()=>{
+  const code=verifyCodeInput.value.trim();
+  const store=JSON.parse(localStorage.getItem('oricket_bookings')||'[]');
+  const found=store.find(b=>b.code===code);
+  verifyResult.classList.remove('hidden');
+  if(found){
+    verifyResult.textContent=`✅ VALID BOOKING\n\nCode: ${found.code}\nName: ${found.data.fullname}\nDate: ${found.data.matchDate}\nPlayers: ${found.data.tickets||'1'}\nTeam: ${found.data.team||'-'}\nCategory: ${found.data.category}`;
+  }else{
+    verifyResult.textContent='❌ INVALID BOOKING CODE';
+  }
+};
+
+(function(){
+  const md=document.getElementById('matchDate');
+  if(md&&!md.value) md.value=new Date().toISOString().slice(0,10);
+})();
+</script>
+</body>
+</html>
